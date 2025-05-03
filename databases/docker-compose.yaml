@@ -1,0 +1,32 @@
+version: "3.8"
+
+services:
+  project_pfa_db_mysql:
+    image: mysql:8.0
+    container_name: project_pfa_db_mysql
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_USER: springmicroserviceuser
+      MYSQL_PASSWORD: 111111
+    ports:
+      - "3332:3306"
+    volumes:
+      - project_pfa_db_data:/var/lib/mysql
+      - ./mysql/init:/docker-entrypoint-initdb.d
+    networks:
+      - project_pfa_db_network
+
+  project_pfa_db_adminer:
+    image: adminer
+    container_name: project_pfa_db_adminer
+    ports:
+      - "34780:8080"
+    networks:
+      - project_pfa_db_network
+
+volumes:
+  project_pfa_db_data:
+
+networks:
+  project_pfa_db_network:
+    driver: bridge

@@ -1,0 +1,41 @@
+services:
+
+  keycloak:
+    image: quay.io/keycloak/keycloak:18.0.2
+    container_name: pfa_project_keycloak
+    ports:
+      - "8443:8443"
+    environment:
+      - KEYCLOAK_ADMIN=admin
+      - KEYCLOAK_ADMIN_PASSWORD=admin
+    command:
+      - start
+      - --https-port=8443
+      - --https-certificate-file=/etc/x509/https/tls.crt
+      - --https-certificate-key-file=/etc/x509/https/tls.key
+      - --hostname=localhost
+      - --hostname-strict=false
+    volumes:
+      - ./keycloak/certs:/etc/x509/https:ro
+    networks:
+      - pfa_project_backend
+
+  rabbitmq:
+    image: "rabbitmq:3-management"
+    container_name: pfa_project_rmq3
+    environment:
+      RABBITMQ_DEFAULT_USER: "rabbitmq"
+      RABBITMQ_DEFAULT_PASS: "123456"
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    networks:
+      - pfa_project_backend
+
+networks:
+  pfa_project_backend:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 172.50.0.0/16
+
