@@ -1,0 +1,31 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: management-service
+  labels:
+    app: management-service
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: management-service
+  template:
+    metadata:
+      labels:
+        app: management-service
+    spec:
+      containers:
+      - name: management-service
+        image: microacrregistry.azurecr.io/management-service
+        ports:
+        - containerPort: 8081
+        env:
+        - name: CONFIG_SERVER_URI
+          value: "http://configserver-service:9191"
+        - name: EUREKA_SERVER_URI
+          value: "http://eureka-service:8761/eureka"
+        # If you prefer to load environment variables from a ConfigMap,
+        # uncomment the following lines and remove the explicit env entries above.
+        # envFrom:
+        # - configMapRef:
+        #     name: user-service-config

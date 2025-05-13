@@ -1,0 +1,8 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: user-service-config
+data:
+  spring.application.name: "user-service"
+  spring.config.import: "optional:configserver:http://configserver-service:9191/"
+  LOG_LEVEL: "INFO"
