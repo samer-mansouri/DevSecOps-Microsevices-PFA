@@ -34,6 +34,7 @@ pipeline {
                 -Dsonar.sources=src/main/java \
                 -Dsonar.tests=src/test/java \
                 -Dsonar.java.binaries=target/classes \
+                -Dsonar.junit.reportPaths=target/surefire-reports \
                 -Dsonar.coverage.jacoco.xmlReportPaths=target/site/jacoco/jacoco.xml \
                 -Deureka.client.enabled=false \
                 -Dspring.cloud.config.enabled=false
