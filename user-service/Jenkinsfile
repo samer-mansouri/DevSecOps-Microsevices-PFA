@@ -1,0 +1,29 @@
+pipeline {
+  agent any
+
+  tools {
+    maven 'Maven3'
+  }
+
+  environment {
+    SONARQUBE_ENV = 'SonarScanner'
+  }
+
+  stages {
+    stage('Checkout') {
+      steps {
+        checkout scm
+      }
+    }
+
+    stage('SonarQube Analysis') {
+      steps {
+        withSonarQubeEnv("${SONARQUBE_ENV}") {
+          dir('user-service') {
+            sh 'mvn clean verify sonar:sonar'
+          }
+        }
+      }
+    }
+  }
+}
