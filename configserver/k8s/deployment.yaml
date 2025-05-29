@@ -1,0 +1,31 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: config-server
+  labels:
+    app: config-server
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: config-server
+  template:
+    metadata:
+      labels:
+        app: config-server
+    spec:
+      containers:
+      - name: config-server
+        image: microacrregistry.azurecr.io/config-server
+        ports:
+        - containerPort: 9191
+        env:
+        - name: SPRING_PROFILES_ACTIVE
+          value: "native"
+        - name: SERVER_PORT
+          value: "9191"
+        - name: EUREKA_SERVER_URL
+          valueFrom:
+            configMapKeyRef:
+              name: config-server-env
+              key: EUREKA_SERVER_URL

@@ -1,0 +1,37 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: management-service
+  labels:
+    app: management-service
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: management-service
+  template:
+    metadata:
+      labels:
+        app: management-service
+    spec:
+      containers:
+      - name: management-service
+        image: microacrregistry.azurecr.io/management-service
+        ports:
+        - containerPort: 9002
+        env:
+          - name: CONFIG_SERVER_URL
+            valueFrom:
+              configMapKeyRef:
+                name: config-server-env
+                key: CONFIG_SERVER_URL
+          - name: EUREKA_SERVER_URL
+            valueFrom:
+              configMapKeyRef:
+                name: config-server-env
+                key: EUREKA_SERVER_URL
+          - name: KEYCLOAK_SERVER_URL
+            valueFrom:
+              configMapKeyRef:
+                name: config-server-env
+                key: KEYCLOAK_SERVER_URL

@@ -1,0 +1,52 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: user-service
+  labels:
+    app: user-service
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: user-service
+  template:
+    metadata:
+      labels:
+        app: user-service
+    spec:
+      containers:
+      - name: user-service
+        image: microacrregistry.azurecr.io/user-service
+        ports:
+        - containerPort: 9000
+        env:
+        - name: CONFIG_SERVER_URL
+          valueFrom:
+            configMapKeyRef:
+              name: config-server-env
+              key: CONFIG_SERVER_URL
+        - name: EUREKA_SERVER_URL
+          valueFrom:
+            configMapKeyRef:
+              name: config-server-env
+              key: EUREKA_SERVER_URL
+        - name: KEYCLOAK_SERVER_URL
+          valueFrom:
+            configMapKeyRef:
+              name: config-server-env
+              key: KEYCLOAK_SERVER_URL
+        - name: MYSQL_DB_URL
+          valueFrom:
+            configMapKeyRef:
+              name: config-server-env
+              key: MYSQL_DB_URL
+        - name: MYSQL_DB_USERNAME
+          valueFrom:
+            configMapKeyRef:
+              name: config-server-env
+              key: MYSQL_DB_USERNAME
+        - name: MYSQL_DB_PASSWORD
+          valueFrom:
+            configMapKeyRef:
+              name: config-server-env
+              key: MYSQL_DB_PASSWORD
