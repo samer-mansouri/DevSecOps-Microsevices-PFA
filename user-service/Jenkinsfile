@@ -16,11 +16,28 @@ pipeline {
       }
     }
 
+    stage('Run Tests + Generate Coverage') {
+      steps {
+        dir('user-service') {
+          sh 'mvn clean verify -Deureka.client.enabled=false -Dspring.cloud.config.enabled=false'
+        }
+      }
+    }
+
     stage('SonarQube Analysis') {
       steps {
         withSonarQubeEnv("${SONARQUBE_ENV}") {
           dir('user-service') {
-            sh 'mvn clean verify sonar:sonar'
+            sh '''
+              mvn sonar:sonar \
+                -Dsonar.projectKey=user-service \
+                -Dsonar.sources=src/main/java \
+                -Dsonar.tests=src/test/java \
+                -Dsonar.java.binaries=target/classes \
+                -Dsonar.coverage.jacoco.xmlReportPaths=target/site/jacoco/jacoco.xml \
+                -Deureka.client.enabled=false \
+                -Dspring.cloud.config.enabled=false
+            '''
           }
         }
       }
