@@ -19,8 +19,15 @@ spec:
         image: microacrregistry.azurecr.io/api-gateway
         ports:
         - containerPort: 8080
-        environment:
-        - name: EUREKA_CLIENT_SERVICEURL_DEFAULTZONE
-          value: "http://eureka-service:8761/eureka"
-        - name: SPRING_CLOUD_CONFIG_URI
-          value: "http://configserver-service:9191"
+        env:
+        - name: CONFIG_SERVER_URL
+          valueFrom:
+            configMapKeyRef:
+              name: config-server-env
+              key: CONFIG_SERVER_URL
+        - name: EUREKA_SERVER_URL
+          valueFrom:
+            configMapKeyRef:
+              name: config-server-env
+              key: EUREKA_SERVER_URL
+          

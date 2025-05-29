@@ -1,0 +1,15 @@
+auth:
+  rootPassword: root
+  username: springmicroserviceuser
+  password: "111111"
+
+primary:
+  persistence:
+    enabled: true
+    size: 4Gi
+
+initdbScriptsConfigMap: mysql-init
+
+extraConfigmaps:
+  - name: mysql-init
+    mountPath: /docker-entrypoint-initdb.d

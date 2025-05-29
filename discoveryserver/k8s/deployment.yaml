@@ -23,5 +23,5 @@ spec:
           - name: CONFIG_SERVER_URL
             valueFrom:
               configMapKeyRef:
-                name: discovery-server-config
+                name: config-server-env
                 key: CONFIG_SERVER_URL

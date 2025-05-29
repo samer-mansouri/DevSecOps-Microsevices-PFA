@@ -18,14 +18,20 @@ spec:
       - name: management-service
         image: microacrregistry.azurecr.io/management-service
         ports:
-        - containerPort: 8081
+        - containerPort: 9002
         env:
-        - name: CONFIG_SERVER_URI
-          value: "http://configserver-service:9191"
-        - name: EUREKA_SERVER_URI
-          value: "http://eureka-service:8761/eureka"
-        # If you prefer to load environment variables from a ConfigMap,
-        # uncomment the following lines and remove the explicit env entries above.
-        # envFrom:
-        # - configMapRef:
-        #     name: user-service-config
+          - name: CONFIG_SERVER_URL
+            valueFrom:
+              configMapKeyRef:
+                name: config-server-env
+                key: CONFIG_SERVER_URL
+          - name: EUREKA_SERVER_URL
+            valueFrom:
+              configMapKeyRef:
+                name: config-server-env
+                key: EUREKA_SERVER_URL
+          - name: KEYCLOAK_SERVER_URL
+            valueFrom:
+              configMapKeyRef:
+                name: config-server-env
+                key: KEYCLOAK_SERVER_URL

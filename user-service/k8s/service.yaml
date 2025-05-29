@@ -7,6 +7,6 @@ spec:
     app: user-service
   ports:
   - protocol: TCP
-    port: 80
-    targetPort: 8081
+    port: 9000
+    targetPort: 9000
   type: ClusterIP
