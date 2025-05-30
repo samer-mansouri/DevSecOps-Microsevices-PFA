@@ -44,23 +44,26 @@ pipeline {
       }
     }
 
-    stage('Dependency Check Analysis') {
+   stage('Dependency Check Analysis') {
+    steps {
+     dir('user-service') {
+      dependencyCheck odcInstallation: 'DependencyCheck', additionalArguments: '--project user-service --format ALL --out ./dependency-check-report .'
+      archiveArtifacts artifacts: 'dependency-check-report/*', fingerprint: true
+         }
+        }
+    }
+
+    
+    stage('Trivy Scan') {
       steps {
         dir('user-service') {
-          dependencyCheck odcInstallation: 'DependencyCheck', additionalArguments: '--project user-service --format ALL --out ./dependency-check-report .'
-          archiveArtifacts artifacts: 'user-service/dependency-check-report/*', fingerprint: true
+          sh 'trivy fs --scanners vuln --format table --output trivy-report.txt .'
+          archiveArtifacts artifacts: 'trivy-report.txt', fingerprint: true
         }
       }
     }
 
-    stage('Trivy Scan') {
-      steps {
-        dir('user-service') {
-           sh 'trivy fs --security-checks vuln . > trivy-vulnerabilities.txt'
-           archiveArtifacts artifacts: 'trivy-vulnerabilities.txt', fingerprint: true
-        }
-      }
-    }
+
 
   }
 }
