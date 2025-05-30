@@ -47,8 +47,9 @@ pipeline {
     stage('Dependency Check Analysis') {
       steps {
         dir('user-service') {
-          sh 'dependency-check --scan . --project "user-service" --format ALL --out ./dependency-check-report'
-          archiveArtifacts artifacts: 'dependency-check-report/*', fingerprint: true
+          dependencyCheck additionalArguments: '--project "user-service" --format ALL --out ./dependency-check-report', 
+                          scanPath: '.'
+          archiveArtifacts artifacts: 'user-service/dependency-check-report/*', fingerprint: true
         }
       }
     }
