@@ -29,6 +29,7 @@ public class UserServiceImpl implements UserService {
     public String signUpUser(SignUpRequest signUpRequest) {
 
         LOGGER.info("UserServiceImpl | signUpUser is started");
+        LOGGER.info("Test CI/CD");
 
         KeycloakUser keycloakUser = new KeycloakUser();
         keycloakUser.setFirstName(signUpRequest.getName());
