@@ -6,7 +6,10 @@ metadata:
 data:
   EUREKA_SERVER_URL: http://discovery-server.default.svc.cluster.local:8761/eureka
   CONFIG_SERVER_URL: http://config-server.default.svc.cluster.local:9191/
-  KEYCLOAK_SERVER_URL : https://keycloak-http.default.svc.cluster.local:8443/
+  KEYCLOAK_SERVER_URL : http://keycloak-http.default.svc.cluster.local/auth/
   MYSQL_DB_URL : jdbc:mysql://mysql-db.default.svc.cluster.local:3306/springbootuser?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=Turkey
   MYSQL_DB_USERNAME : springmicroserviceuser
   MYSQL_DB_PASSWORD : "111111"
+  RABBITMQ_HOST : rabbitmq.default.svc.cluster.local
+  RABBITMQ_USERNAME : user
+  RABBITMQ_PASSWORD : VpiBgYkUWyTtgG0c

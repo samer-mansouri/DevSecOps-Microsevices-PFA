@@ -16,7 +16,7 @@ import org.jboss.resteasy.client.jaxrs.ResteasyClientBuilder;
 @Configuration
 public class KeycloakConfig {
 
-    public final static String serverUrl = "https://keycloak-http.default.svc.cluster.local:8443";
+    public final static String serverUrl = "http://keycloak-http.default.svc.cluster.local/auth";
     public final static String realm = "master";
     public final static String clientId = "spring-boot-microservice-keycloak";
     public final static String clientSecret = "snW4v6floZNsQ410FqPm2jxApITNmTe2";
