@@ -1,24 +1,24 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: report-service
+  name: advertisement-service
   labels:
-    app: report-service
+    app: advertisement-service
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: report-service
+      app: advertisement-service
   template:
     metadata:
       labels:
-        app: report-service
+        app: advertisement-service
     spec:
       containers:
-      - name: report-service
-        image: microacrregistry.azurecr.io/report-service
+      - name: advertisement-service
+        image: microacrregistry.azurecr.io/advertisement-service
         ports:
-        - containerPort: 9003
+        - containerPort: 9001
         env:
         - name: CONFIG_SERVER_URL
           valueFrom:
