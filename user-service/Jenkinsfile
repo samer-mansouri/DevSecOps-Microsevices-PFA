@@ -73,5 +73,22 @@ pipeline {
         }
       }
     }
+
+    stage('Trivy Image Scan') {
+      steps {
+        dir('user-service') {
+          sh '''
+            docker build -t user-service:latest .
+            trivy image --format table --output trivy-image-report.txt user-service:latest
+          '''
+          archiveArtifacts artifacts: 'trivy-image-report.txt', fingerprint: true
+        }
+      }
+  }
+
+
+
+
+
   }
 }
