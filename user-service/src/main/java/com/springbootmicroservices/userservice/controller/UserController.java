@@ -98,4 +98,6 @@ public class UserController {
         return ResponseEntity.ok(role);
     }
 
+    // This is a placeholder for the user controller. to test pipeline triggering
+
 }
