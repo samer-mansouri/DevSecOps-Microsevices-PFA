@@ -40,8 +40,8 @@ pipeline {
                     }
 
                     if (changedDirs.contains("management-service")) {
-                        echo "Triggering user-service pipeline..."
-                        build job: 'build-user-service', wait: false
+                        echo "Triggering management-service pipeline..."
+                        build job: 'build-management-service', wait: false
                     }
 
                     if (changedDirs.contains("report-service")) {
