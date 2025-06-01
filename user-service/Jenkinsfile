@@ -17,9 +17,6 @@ pipeline {
     }
 
     stage('Run Tests + Generate Coverage') {
-      when {
-        changeset "user-service/**"
-      }
       steps {
         dir('user-service') {
           sh 'mvn clean verify -Deureka.client.enabled=false -Dspring.cloud.config.enabled=false'
@@ -28,9 +25,6 @@ pipeline {
     }
 
     stage('SonarQube Analysis') {
-      when {
-        changeset "user-service/**"
-      }
       steps {
         withSonarQubeEnv("${SONARQUBE_ENV}") {
           dir('user-service') {
@@ -51,9 +45,7 @@ pipeline {
     }
 
     stage('Dependency Check Analysis') {
-      when {
-        changeset "user-service/**"
-      }
+
       steps {
         dir('user-service') {
           dependencyCheck odcInstallation: 'DependencyCheck', additionalArguments: '--project user-service --format ALL --out ./dependency-check-report .'
@@ -63,9 +55,6 @@ pipeline {
     }
 
     stage('Trivy Scan') {
-      when {
-        changeset "user-service/**"
-      }
       steps {
         dir('user-service') {
           sh 'trivy fs --scanners vuln --format table --output trivy-report.txt .'
