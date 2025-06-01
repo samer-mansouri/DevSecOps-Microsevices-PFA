@@ -7,6 +7,8 @@ pipeline {
 
   environment {
     SONARQUBE_ENV = 'SonarQube'
+    JENKINS_URL = 'http://172.189.136.27:8080'
+    SONARQUBE_URL = 'http://172.189.136.27:9000'
   }
 
   stages {
@@ -102,7 +104,6 @@ pipeline {
           allowMissing: true,
           alwaysLinkToLastBuild: true
         ])
-
         publishHTML([
           reportDir: 'user-service',
           reportFiles: 'trivy-report.txt',
@@ -111,7 +112,6 @@ pipeline {
           allowMissing: true,
           alwaysLinkToLastBuild: true
         ])
-
         publishHTML([
           reportDir: 'user-service',
           reportFiles: 'trivy-image-report.txt',
@@ -129,51 +129,8 @@ pipeline {
       withCredentials([string(credentialsId: 'slack-webhook', variable: 'SLACK_URL')]) {
         sh """
           curl -X POST -H 'Content-type: application/json' \\
-          --data '{
-            "username": "Jenkins CI",
-            "icon_url": "https://raw.githubusercontent.com/jenkinsci/jenkins/master/images/logos/jenkins/jenkins.png",
-            "blocks": [
-              {
-                "type": "section",
-                "text": {
-                  "type": "mrkdwn",
-                  "text": ":white_check_mark: *SUCCESS* — *${env.JOB_NAME}* (#${env.BUILD_NUMBER})"
-                }
-              },
-              {
-                "type": "context",
-                "elements": [
-                  {
-                    "type": "mrkdwn",
-                    "text": "*Duration:* ${currentBuild.durationString.replace(' and counting', '')}"
-                  },
-                  {
-                    "type": "mrkdwn",
-                    "text": "*Branch:* `${env.GIT_BRANCH}`"
-                  }
-                ]
-              },
-              {
-                "type": "divider"
-              },
-              {
-                "type": "section",
-                "text": {
-                  "type": "mrkdwn",
-                  "text": "*Reports:*\\n• <${env.BUILD_URL}artifact/user-service/dependency-check-report/dependency-check-report.html|OWASP Report>\\n• <${env.BUILD_URL}artifact/user-service/trivy-report.txt|Trivy FS Report>\\n• <${env.BUILD_URL}artifact/user-service/trivy-image-report.txt|Trivy Image Report>"
-                }
-              },
-              {
-                "type": "context",
-                "elements": [
-                  {
-                    "type": "mrkdwn",
-                    "text": "<${env.BUILD_URL}|View full build logs>"
-                  }
-                ]
-              }
-            ]
-          }' "$SLACK_URL"
+          --data '{"text": "*✅ Build SUCCESS — ${env.JOB_NAME} (#${env.BUILD_NUMBER})*\n\n*Reports:*\n• SonarQube: ${env.SONARQUBE_URL}/dashboard?id=user-service\n• Dependency Check: ${env.JENKINS_URL}/job/${env.JOB_NAME}/${env.BUILD_NUMBER}/artifact/user-service/dependency-check-report/dependency-check-report.html\n• Trivy FS Scan: ${env.JENKINS_URL}/job/${env.JOB_NAME}/${env.BUILD_NUMBER}/artifact/user-service/trivy-report.txt\n• Trivy Image Scan: ${env.JENKINS_URL}/job/${env.JOB_NAME}/${env.BUILD_NUMBER}/artifact/user-service/trivy-image-report.txt\n\n🔗 *Build logs:* ${env.BUILD_URL}"}' \\
+          "$SLACK_URL"
         """
       }
     }
@@ -182,11 +139,8 @@ pipeline {
       withCredentials([string(credentialsId: 'slack-webhook', variable: 'SLACK_URL')]) {
         sh """
           curl -X POST -H 'Content-type: application/json' \\
-          --data '{
-            "username": "Jenkins CI",
-            "icon_url": "https://raw.githubusercontent.com/jenkinsci/jenkins/master/images/logos/jenkins/jenkins.png",
-            "text": ":x: *FAILED* — Job: ${env.JOB_NAME} (#${env.BUILD_NUMBER})\\n<${env.BUILD_URL}|View build details>"
-          }' "$SLACK_URL"
+          --data '{"text": "*❌ Build FAILED — ${env.JOB_NAME} (#${env.BUILD_NUMBER})*\n\n🔗 *Build logs:* ${env.BUILD_URL}"}' \\
+          "$SLACK_URL"
         """
       }
     }
