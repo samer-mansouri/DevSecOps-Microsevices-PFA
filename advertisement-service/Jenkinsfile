@@ -1,0 +1,81 @@
+pipeline {
+  agent any
+
+  tools {
+    maven 'Maven3'
+  }
+
+  environment {
+    SONARQUBE_ENV = 'SonarQube'
+  }
+
+  stages {
+    stage('Checkout') {
+      steps {
+        checkout scm
+      }
+    }
+
+    stage('Run Tests + Generate Coverage') {
+      steps {
+        dir('advertisement-service') {
+          sh 'mvn clean verify -Deureka.client.enabled=false -Dspring.cloud.config.enabled=false'
+        }
+      }
+    }
+
+    stage('SonarQube Analysis') {
+      steps {
+        withSonarQubeEnv("${SONARQUBE_ENV}") {
+          dir('advertisement-service') {
+            sh '''
+              mvn sonar:sonar \
+                -Dsonar.projectKey=advertisement-service \
+                -Dsonar.sources=src/main/java \
+                -Dsonar.tests=src/test/java \
+                -Dsonar.java.binaries=target/classes \
+                -Dsonar.junit.reportPaths=target/surefire-reports \
+                -Dsonar.coverage.jacoco.xmlReportPaths=target/site/jacoco/jacoco.xml \
+                -Deureka.client.enabled=false \
+                -Dspring.cloud.config.enabled=false
+            '''
+          }
+        }
+      }
+    }
+
+    stage('Dependency Check Analysis') {
+
+      steps {
+        dir('advertisement-service') {
+          dependencyCheck odcInstallation: 'DependencyCheck', additionalArguments: '--project advertisement-service --format ALL --out ./dependency-check-report .'
+          archiveArtifacts artifacts: 'dependency-check-report/*', fingerprint: true
+        }
+      }
+    }
+
+    stage('Trivy Scan') {
+      steps {
+        dir('advertisement-service') {
+          sh 'trivy fs --scanners vuln --format table --output trivy-report.txt .'
+          archiveArtifacts artifacts: 'trivy-report.txt', fingerprint: true
+        }
+      }
+    }
+
+    stage('Trivy Image Scan') {
+      steps {
+        dir('advertisement-service') {
+          sh '''
+            docker build -t advertisement-service:latest .
+            trivy image --format table --output trivy-image-report.txt advertisement-service:latest
+          '''
+          archiveArtifacts artifacts: 'trivy-image-report.txt', fingerprint: true
+        }
+      }
+  }
+
+
+
+  }
+}
