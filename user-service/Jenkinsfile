@@ -91,5 +91,36 @@ pipeline {
         }
       }
     }
+    
+    stage('Publish HTML Reports') {
+      steps {
+        publishHTML([
+          reportDir: 'user-service/dependency-check-report',
+          reportFiles: 'dependency-check-report.html',
+          reportName: 'OWASP Dependency-Check Report',
+          keepAll: true,
+          allowMissing: true,
+          alwaysLinkToLastBuild: true
+        ])
+
+        publishHTML([
+          reportDir: 'user-service',
+          reportFiles: 'trivy-report.txt',
+          reportName: 'Trivy FS Report',
+          keepAll: true,
+          allowMissing: true,
+          alwaysLinkToLastBuild: true
+        ])
+
+        publishHTML([
+          reportDir: 'user-service',
+          reportFiles: 'trivy-image-report.txt',
+          reportName: 'Trivy Image Report',
+          keepAll: true,
+          allowMissing: true,
+          alwaysLinkToLastBuild: true
+        ])
+      }
+    }
   }
 }
