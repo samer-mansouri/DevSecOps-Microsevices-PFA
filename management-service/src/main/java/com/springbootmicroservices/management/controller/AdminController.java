@@ -30,7 +30,7 @@ public class AdminController {
 
         LOGGER.info("AdminController | createAdvertisement | userId : " + userId);
 
-        LOGGER.info("Test CI/CD")
+        LOGGER.info("Test CI/CD 2");
 
         adminService.createAdvertisement(advertisementRequest,userId);
         return ResponseEntity.status(HttpStatus.CREATED).body("Advertisement Created");
