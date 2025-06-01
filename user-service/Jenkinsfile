@@ -45,7 +45,6 @@ pipeline {
     }
 
     stage('Dependency Check Analysis') {
-
       steps {
         dir('user-service') {
           dependencyCheck odcInstallation: 'DependencyCheck', additionalArguments: '--project user-service --format ALL --out ./dependency-check-report .'
@@ -54,7 +53,7 @@ pipeline {
       }
     }
 
-    stage('Trivy Scan') {
+    stage('Trivy FS Scan') {
       steps {
         dir('user-service') {
           sh 'trivy fs --scanners vuln --format table --output trivy-report.txt .'
@@ -63,21 +62,34 @@ pipeline {
       }
     }
 
+    stage('Docker Build') {
+      steps {
+        dir('user-service') {
+          sh 'docker build -t microacrregistry.azurecr.io/user-service:latest .'
+        }
+      }
+    }
+
     stage('Trivy Image Scan') {
       steps {
         dir('user-service') {
-          sh '''
-            docker build -t user-service:latest .
-            trivy image --format table --output trivy-image-report.txt user-service:latest
-          '''
+          sh 'trivy image --format table --output trivy-image-report.txt microacrregistry.azurecr.io/user-service:latest'
           archiveArtifacts artifacts: 'trivy-image-report.txt', fingerprint: true
         }
       }
-  }
+    }
 
-
-
-
-
+    stage('Push Docker Image to ACR') {
+      steps {
+        dir('user-service') {
+          withCredentials([usernamePassword(credentialsId: 'acr-creds', usernameVariable: 'ACR_USER', passwordVariable: 'ACR_PASS')]) {
+            sh '''
+              echo $ACR_PASS | docker login microacrregistry.azurecr.io -u $ACR_USER --password-stdin
+              docker push microacrregistry.azurecr.io/user-service:latest
+            '''
+          }
+        }
+      }
+    }
   }
 }
