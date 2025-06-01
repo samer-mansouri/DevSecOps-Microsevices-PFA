@@ -127,21 +127,67 @@ pipeline {
   post {
     success {
       withCredentials([string(credentialsId: 'slack-webhook', variable: 'SLACK_URL')]) {
-        sh '''
-          curl -X POST -H 'Content-type: application/json' \
-            --data '{"text":":white_check_mark: *SUCCESS* - Job: '$JOB_NAME' (#'$BUILD_NUMBER')"}' \
-            "$SLACK_URL"
-        '''
+        sh """
+          curl -X POST -H 'Content-type: application/json' \\
+          --data '{
+            "username": "Jenkins CI",
+            "icon_url": "https://raw.githubusercontent.com/jenkinsci/jenkins/master/images/logos/jenkins/jenkins.png",
+            "blocks": [
+              {
+                "type": "section",
+                "text": {
+                  "type": "mrkdwn",
+                  "text": ":white_check_mark: *SUCCESS* — *${env.JOB_NAME}* (#${env.BUILD_NUMBER})"
+                }
+              },
+              {
+                "type": "context",
+                "elements": [
+                  {
+                    "type": "mrkdwn",
+                    "text": "*Duration:* ${currentBuild.durationString.replace(' and counting', '')}"
+                  },
+                  {
+                    "type": "mrkdwn",
+                    "text": "*Branch:* `${env.GIT_BRANCH}`"
+                  }
+                ]
+              },
+              {
+                "type": "divider"
+              },
+              {
+                "type": "section",
+                "text": {
+                  "type": "mrkdwn",
+                  "text": "*Reports:*\\n• <${env.BUILD_URL}artifact/user-service/dependency-check-report/dependency-check-report.html|OWASP Report>\\n• <${env.BUILD_URL}artifact/user-service/trivy-report.txt|Trivy FS Report>\\n• <${env.BUILD_URL}artifact/user-service/trivy-image-report.txt|Trivy Image Report>"
+                }
+              },
+              {
+                "type": "context",
+                "elements": [
+                  {
+                    "type": "mrkdwn",
+                    "text": "<${env.BUILD_URL}|View full build logs>"
+                  }
+                ]
+              }
+            ]
+          }' "$SLACK_URL"
+        """
       }
     }
 
     failure {
       withCredentials([string(credentialsId: 'slack-webhook', variable: 'SLACK_URL')]) {
-        sh '''
-          curl -X POST -H 'Content-type: application/json' \
-            --data '{"text":":x: *FAILED* - Job: '$JOB_NAME' (#'$BUILD_NUMBER')"}' \
-            "$SLACK_URL"
-        '''
+        sh """
+          curl -X POST -H 'Content-type: application/json' \\
+          --data '{
+            "username": "Jenkins CI",
+            "icon_url": "https://raw.githubusercontent.com/jenkinsci/jenkins/master/images/logos/jenkins/jenkins.png",
+            "text": ":x: *FAILED* — Job: ${env.JOB_NAME} (#${env.BUILD_NUMBER})\\n<${env.BUILD_URL}|View build details>"
+          }' "$SLACK_URL"
+        """
       }
     }
   }
