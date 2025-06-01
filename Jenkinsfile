@@ -39,6 +39,11 @@ pipeline {
                         build job: 'build-user-service', wait: false
                     }
 
+                    if (changedDirs.contains("management-service")) {
+                        echo "Triggering user-service pipeline..."
+                        build job: 'build-user-service', wait: false
+                    }
+
                     if (changedDirs.contains("report-service")) {
                         echo "Triggering report-service pipeline..."
                         build job: 'build-report-service', wait: false
@@ -59,7 +64,7 @@ pipeline {
                         build job: 'build-configserver', wait: false
                     }
 
-                    if (changedDirs.every { !["user-service", "report-service", "api-gateway", "advertisement-service", "configserver"].contains(it) }) {
+                    if (changedDirs.every { !["user-service", "management-service", "report-service", "api-gateway", "advertisement-service", "configserver"].contains(it) }) {
                         echo "No relevant microservice changed — no pipelines triggered."
                     }
                 }
