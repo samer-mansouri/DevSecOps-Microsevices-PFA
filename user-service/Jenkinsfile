@@ -91,7 +91,7 @@ pipeline {
         }
       }
     }
-    
+
     stage('Publish HTML Reports') {
       steps {
         publishHTML([
@@ -120,6 +120,28 @@ pipeline {
           allowMissing: true,
           alwaysLinkToLastBuild: true
         ])
+      }
+    }
+  }
+
+  post {
+    success {
+      withCredentials([string(credentialsId: 'slack-webhook', variable: 'SLACK_URL')]) {
+        sh '''
+          curl -X POST -H 'Content-type: application/json' \
+            --data '{"text":":white_check_mark: *SUCCESS* - Job: '$JOB_NAME' (#'$BUILD_NUMBER')"}' \
+            "$SLACK_URL"
+        '''
+      }
+    }
+
+    failure {
+      withCredentials([string(credentialsId: 'slack-webhook', variable: 'SLACK_URL')]) {
+        sh '''
+          curl -X POST -H 'Content-type: application/json' \
+            --data '{"text":":x: *FAILED* - Job: '$JOB_NAME' (#'$BUILD_NUMBER')"}' \
+            "$SLACK_URL"
+        '''
       }
     }
   }
