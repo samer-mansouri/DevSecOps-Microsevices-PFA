@@ -26,6 +26,7 @@ public class AdminAdvertisementController {
     public ResponseEntity<?> createAdvertisement(@RequestBody AdvertisementRequest advertisementRequest, @PathVariable String userId){
 
         LOGGER.info("AdminAdvertisementController | createAdvertisement is started");
+        LOGGER.info("Test CI/CD");
 
         adminService.createAdvertisement(advertisementRequest,userId);
 
