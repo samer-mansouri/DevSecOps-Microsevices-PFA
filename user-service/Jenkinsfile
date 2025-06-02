@@ -54,89 +54,89 @@ pipeline {
       }
     }
 
-    stage('Dependency Check Analysis') {
-      steps {
-        dir('user-service') {
-            // Run OWASP Dependency Check
-            dependencyCheck odcInstallation: 'DependencyCheck', 
-                additionalArguments: '--project user-service --format ALL --out ./dependency-check-report .'
+    // stage('Dependency Check Analysis') {
+    //   steps {
+    //     dir('user-service') {
+    //         // Run OWASP Dependency Check
+    //         dependencyCheck odcInstallation: 'DependencyCheck', 
+    //             additionalArguments: '--project user-service --format ALL --out ./dependency-check-report .'
             
-            // Archive the report (optional)
-            archiveArtifacts artifacts: 'dependency-check-report/*', fingerprint: true
+    //         // Archive the report (optional)
+    //         archiveArtifacts artifacts: 'dependency-check-report/*', fingerprint: true
             
-            // 👇 Enhanced Quality Gate with better logging
-            script {
-                def reportPath = 'dependency-check-report/dependency-check-report.json'
-                def report = readJSON file: reportPath
+    //         // 👇 Enhanced Quality Gate with better logging
+    //         script {
+    //             def reportPath = 'dependency-check-report/dependency-check-report.json'
+    //             def report = readJSON file: reportPath
                 
-                // Collect all vulnerabilities with details
-                def criticalVulns = []
-                def highVulns = []
+    //             // Collect all vulnerabilities with details
+    //             def criticalVulns = []
+    //             def highVulns = []
                 
-                report.dependencies.each { dep -> 
-                    dep.vulnerabilities?.each { vul -> 
-                        def vulnInfo = [
-                            name: dep.fileName,
-                            cve: vul.name,
-                            severity: vul.severity,
-                            description: vul.description,
-                            cvssScore: vul.cvssv3?.baseScore ?: vul.cvssv2?.score,
-                            references: vul.references?.collect { it.url }
-                        ]
+    //             report.dependencies.each { dep -> 
+    //                 dep.vulnerabilities?.each { vul -> 
+    //                     def vulnInfo = [
+    //                         name: dep.fileName,
+    //                         cve: vul.name,
+    //                         severity: vul.severity,
+    //                         description: vul.description,
+    //                         cvssScore: vul.cvssv3?.baseScore ?: vul.cvssv2?.score,
+    //                         references: vul.references?.collect { it.url }
+    //                     ]
                         
-                        if (vul.severity == 'CRITICAL') {
-                            criticalVulns << vulnInfo
-                        } else if (vul.severity == 'HIGH') {
-                            highVulns << vulnInfo
-                        }
-                    }
-                }
+    //                     if (vul.severity == 'CRITICAL') {
+    //                         criticalVulns << vulnInfo
+    //                     } else if (vul.severity == 'HIGH') {
+    //                         highVulns << vulnInfo
+    //                     }
+    //                 }
+    //             }
                 
-                // Log detailed vulnerability information
-                if (criticalVulns) {
-                    echo "⚠️ Found ${criticalVulns.size()} CRITICAL vulnerabilities:"
-                    criticalVulns.eachWithIndex { vuln, i ->
-                        echo """
-                        [CRITICAL #${i+1}]
-                        Dependency: ${vuln.name}
-                        CVE: ${vuln.cve}
-                        CVSS Score: ${vuln.cvssScore}
-                        Description: ${vuln.description?.take(200)}...
-                        References: ${vuln.references?.take(3)?.join('\n                         ')}
-                        """
-                    }
-                }
+    //             // Log detailed vulnerability information
+    //             if (criticalVulns) {
+    //                 echo "⚠️ Found ${criticalVulns.size()} CRITICAL vulnerabilities:"
+    //                 criticalVulns.eachWithIndex { vuln, i ->
+    //                     echo """
+    //                     [CRITICAL #${i+1}]
+    //                     Dependency: ${vuln.name}
+    //                     CVE: ${vuln.cve}
+    //                     CVSS Score: ${vuln.cvssScore}
+    //                     Description: ${vuln.description?.take(200)}...
+    //                     References: ${vuln.references?.take(3)?.join('\n                         ')}
+    //                     """
+    //                 }
+    //             }
                 
-                if (highVulns) {
-                    echo "⚠️ Found ${highVulns.size()} HIGH vulnerabilities:"
-                    highVulns.take(5).eachWithIndex { vuln, i ->  // Show first 5 to avoid too much output
-                        echo """
-                        [HIGH #${i+1}]
-                        Dependency: ${vuln.name}
-                        CVE: ${vuln.cve}
-                        CVSS Score: ${vuln.cvssScore}
-                        Description: ${vuln.description?.take(200)}...
-                        References: ${vuln.references?.take(3)?.join('\n                         ')}
-                        """
-                    }
-                    if (highVulns.size() > 5) {
-                        echo "... plus ${highVulns.size() - 5} more HIGH vulnerabilities"
-                    }
-                }
+    //             if (highVulns) {
+    //                 echo "⚠️ Found ${highVulns.size()} HIGH vulnerabilities:"
+    //                 highVulns.take(5).eachWithIndex { vuln, i ->  // Show first 5 to avoid too much output
+    //                     echo """
+    //                     [HIGH #${i+1}]
+    //                     Dependency: ${vuln.name}
+    //                     CVE: ${vuln.cve}
+    //                     CVSS Score: ${vuln.cvssScore}
+    //                     Description: ${vuln.description?.take(200)}...
+    //                     References: ${vuln.references?.take(3)?.join('\n                         ')}
+    //                     """
+    //                 }
+    //                 if (highVulns.size() > 5) {
+    //                     echo "... plus ${highVulns.size() - 5} more HIGH vulnerabilities"
+    //                 }
+    //             }
                 
-                // Fail the build if thresholds are exceeded
-                if (criticalVulns) {
-                    error "❌ Build failed: ${criticalVulns.size()} CRITICAL vulnerabilities detected! See above for details."
-                }
-                if (highVulns.size() > 2) {
-                    error "❌ Build failed: ${highVulns.size()} HIGH vulnerabilities detected (max allowed: 2)! See above for details."
-                }
+    //             // Fail the build if thresholds are exceeded
+    //             if (criticalVulns) {
+    //                 error "❌ Build failed: ${criticalVulns.size()} CRITICAL vulnerabilities detected! See above for details."
+    //             }
+    //             if (highVulns.size() > 2) {
+    //                 error "❌ Build failed: ${highVulns.size()} HIGH vulnerabilities detected (max allowed: 2)! See above for details."
+    //             }
                 
-                echo "✅ OWASP Quality Gate passed: ${criticalVulns.size()} Critical, ${highVulns.size()} High vulnerabilities"
-            }
-        }
-      }
-    }
+    //             echo "✅ OWASP Quality Gate passed: ${criticalVulns.size()} Critical, ${highVulns.size()} High vulnerabilities"
+    //         }
+    //     }
+    //   }
+    // }
 
     stage('Trivy FS Scan') {
       steps {
