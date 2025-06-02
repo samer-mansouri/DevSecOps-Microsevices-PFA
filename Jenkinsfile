@@ -38,18 +38,21 @@ pipeline {
           ).trim()
 
           def isTag = tagName?.trim()
-          echo isTag ? "Git tag detected: ${tagName}" : "Regular commit (no tag)"
+          echo isTag ? "Git tag detected: ${tagName}" : "No tag detected (regular commit)"
 
           def knownServices = ["user-service", "management-service", "report-service", "api-gateway", "advertisement-service", "configserver"]
 
           for (service in knownServices) {
             if (changedDirs.contains(service)) {
+              echo "Changes detected in ${service}"
               def waitForBuild = isTag ? true : false
+              def buildParams = isTag ? [string(name: 'GIT_TAG_NAME', value: tagName)] : []
+
               echo "Triggering build-${service} (wait: ${waitForBuild})"
-              def buildResult = build job: "build-${service}", wait: waitForBuild
+              def buildResult = build job: "build-${service}", wait: waitForBuild, parameters: buildParams
 
               if (isTag) {
-                echo "Tag detected — triggering deploy-${service} with tag ${tagName}"
+                echo "Triggering deploy-${service} with tag ${tagName}"
                 build job: "deploy-${service}", wait: false, parameters: [
                   string(name: 'GIT_TAG_NAME', value: tagName)
                 ]
@@ -58,7 +61,7 @@ pipeline {
           }
 
           if (changedDirs.every { !knownServices.contains(it) }) {
-            echo "✅ No relevant service changed — skipping pipelines."
+            echo "No relevant microservice changed — skipping pipelines."
           }
         }
       }

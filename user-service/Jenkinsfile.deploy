@@ -1,0 +1,53 @@
+pipeline {
+  agent any
+
+  environment {
+    KUBE_CONFIG = credentials('aks-kubeconfig')
+  }
+
+  parameters {
+    string(name: 'GIT_TAG_NAME', defaultValue: '', description: 'Git tag for deployment')
+  }
+
+  stages {
+    stage('Checkout Deployment Repo') {
+      steps {
+        git url: 'https://github.com/ElyesBelgouthi/PFA-k8s', branch: 'main'
+      }
+    }
+
+    stage('Set Image Tag') {
+      steps {
+        script {
+          env.IMAGE_TAG = params.GIT_TAG_NAME ?: 'latest'
+          echo "✨ Using image tag: ${env.IMAGE_TAG}"
+
+          sh '''
+          sed -i "s|image: microacrregistry.azurecr.io/user-service.*|image: microacrregistry.azurecr.io/user-service:${IMAGE_TAG}|" user-service/deployment.yaml
+          '''
+        }
+      }
+    }
+
+    stage('Deploy to Kubernetes') {
+      steps {
+        withCredentials([file(credentialsId: 'aks-kubeconfig', variable: 'KUBECONFIG_FILE')]) {
+          sh '''
+          export KUBECONFIG=$KUBECONFIG_FILE
+          kubectl apply -f user-service/deployment.yaml
+          kubectl apply -f user-service/service.yaml
+          '''
+        }
+      }
+    }
+  }
+
+  post {
+    success {
+      echo "Deployment succeeded for user-service:${env.IMAGE_TAG}"
+    }
+    failure {
+      echo "Deployment failed for user-service:${env.IMAGE_TAG}"
+    }
+  }
+}

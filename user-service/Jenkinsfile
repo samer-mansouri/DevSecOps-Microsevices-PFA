@@ -7,6 +7,7 @@ pipeline {
 
   environment {
     SONARQUBE_ENV = 'SonarQube'
+    DOCKER_TAG = "${env.GIT_TAG_NAME ?: 'latest'}"
   }
 
   stages {
@@ -149,7 +150,7 @@ pipeline {
     stage('Docker Build') {
       steps {
         dir('user-service') {
-          sh 'docker build -t microacrregistry.azurecr.io/user-service:latest .'
+          sh "docker build -t microacrregistry.azurecr.io/user-service:${env.DOCKER_TAG} ."
         }
       }
     }
@@ -169,7 +170,7 @@ pipeline {
           withCredentials([usernamePassword(credentialsId: 'acr-creds', usernameVariable: 'ACR_USER', passwordVariable: 'ACR_PASS')]) {
             sh '''
               echo $ACR_PASS | docker login microacrregistry.azurecr.io -u $ACR_USER --password-stdin
-              docker push microacrregistry.azurecr.io/user-service:latest
+              docker push microacrregistry.azurecr.io/user-service:${DOCKER_TAG}
             '''
           }
         }
